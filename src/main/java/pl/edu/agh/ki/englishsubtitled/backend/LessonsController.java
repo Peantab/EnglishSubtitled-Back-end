@@ -1,52 +1,70 @@
 package pl.edu.agh.ki.englishsubtitled.backend;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import pl.edu.agh.ki.englishsubtitled.backend.dto.LessonDto;
 import pl.edu.agh.ki.englishsubtitled.backend.dto.LessonSummaryDto;
+import pl.edu.agh.ki.englishsubtitled.backend.dto.TranslationDto;
 import pl.edu.agh.ki.englishsubtitled.backend.exception.LessonIdInvalidException;
 import pl.edu.agh.ki.englishsubtitled.backend.exception.LessonIdNotFoundException;
-import pl.edu.agh.ki.englishsubtitled.backend.model.Lessons;
+import pl.edu.agh.ki.englishsubtitled.backend.model.Lesson;
+import pl.edu.agh.ki.englishsubtitled.backend.model.Translation;
+import pl.edu.agh.ki.englishsubtitled.backend.repository.LessonRepository;
+import pl.edu.agh.ki.englishsubtitled.backend.service.TranslationService;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @CrossOrigin("*")
 @RestController
 @RequestMapping("/lessons")
 public class LessonsController {
 
-    List<Lessons> lessons;
+    private LessonRepository lessonRepository;
+    private TranslationService translationService;
 
-    LessonsController(){
-        lessons = new ArrayList<>(2);
-        Lessons lesson1 = new Lessons(1, "Big Buck Bunny - full transcription", "Big Buck Bunny");
-        Lessons lesson2 = new Lessons(2, "Mock Movie with words by Justyna", "Mock Movie");
+    @Autowired
+    LessonsController(LessonRepository lessonRepository, TranslationService translationService){
+        this.lessonRepository = lessonRepository;
+        this.translationService = translationService;
 
-        lesson2.addTranslation("home", "dom");
-        lesson2.addTranslation("bag", "torba");
-        lesson2.addTranslation("computer", "komputer");
-        lesson2.addTranslation("bike", "rower");
-        lesson2.addTranslation("dog", "pies");
-        lesson2.addTranslation("cat", "kot");
-        lesson2.addTranslation("frog", "żaba");
-        lesson2.addTranslation("bed", "łóżko");
-        lesson2.addTranslation("leg", "noga");
-        lesson2.addTranslation("sleep", "spać");
-        lesson2.addTranslation("nose", "nos");
-        lesson2.addTranslation("eat", "jeść");
-        lesson2.addTranslation("talk", "mówić");
-        lesson2.addTranslation("live", "żyć");
+        List<TranslationDto> lesson1TranslationDtos = Collections.emptyList();
+        List<TranslationDto> lesson2TranslationDtos = new LinkedList<>();
 
-        lessons.add(lesson1);
-        lessons.add(lesson2);
+        lesson2TranslationDtos.add(new TranslationDto("home", "dom"));
+        lesson2TranslationDtos.add(new TranslationDto("bag", "torba"));
+        lesson2TranslationDtos.add(new TranslationDto("computer", "komputer"));
+        lesson2TranslationDtos.add(new TranslationDto("bike", "rower"));
+        lesson2TranslationDtos.add(new TranslationDto("dog", "pies"));
+        lesson2TranslationDtos.add(new TranslationDto("cat", "kot"));
+        lesson2TranslationDtos.add(new TranslationDto("frog", "żaba"));
+        lesson2TranslationDtos.add(new TranslationDto("bed", "łóżko"));
+        lesson2TranslationDtos.add(new TranslationDto("leg", "noga"));
+        lesson2TranslationDtos.add(new TranslationDto("sleep", "spać"));
+        lesson2TranslationDtos.add(new TranslationDto("nose", "nos"));
+        lesson2TranslationDtos.add(new TranslationDto("eat", "jeść"));
+        lesson2TranslationDtos.add(new TranslationDto("talk", "mówić"));
+        lesson2TranslationDtos.add(new TranslationDto("live", "żyć"));
+
+        List<Translation> lesson1Translations = getOrCreateTranslations(lesson1TranslationDtos);
+        List<Translation> lesson2Translations = getOrCreateTranslations(lesson2TranslationDtos);
+
+        Lesson lesson1 = new Lesson("Big Buck Bunny - full transcription", "Big Buck Bunny", lesson1Translations);
+        Lesson lesson2 = new Lesson("Mock Movie with words by Justyna", "Mock Movie", lesson2Translations);
+
+        lessonRepository.save(lesson1);
+        lessonRepository.save(lesson2);
+    }
+
+    private List<Translation> getOrCreateTranslations(List<TranslationDto> dtos){
+        return dtos.stream().map(dto -> translationService.getOrCreateTranslation(dto.engWord, dto.plWord)).collect(Collectors.toList());
     }
 
     @RequestMapping(method = RequestMethod.GET)
     public List<LessonSummaryDto> getLessons(){
 
         List<LessonSummaryDto> lessonSummaries = new LinkedList<>();
-        for (Lessons lesson: lessons){
+        for (Lesson lesson: lessonRepository.findAll()){
             lessonSummaries.add(lesson.getSummary());
         }
         return lessonSummaries;
@@ -61,12 +79,11 @@ public class LessonsController {
             throw new LessonIdInvalidException(lessonId);
         }
 
-        LessonDto lessonDto;
-        try {
-            lessonDto = lessons.get(lessonIdInt - 1).getDto();
-        } catch(IndexOutOfBoundsException e){
+        Optional<Lesson> lesson = lessonRepository.findById(lessonIdInt);
+
+        if(!lesson.isPresent()) {
             throw new LessonIdNotFoundException(lessonIdInt);
         }
-        return lessonDto;
+        return lesson.get().getDto();
     }
 }

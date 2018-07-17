@@ -4,27 +4,28 @@ import pl.edu.agh.ki.englishsubtitled.backend.dto.LessonDto;
 import pl.edu.agh.ki.englishsubtitled.backend.dto.LessonSummaryDto;
 import pl.edu.agh.ki.englishsubtitled.backend.dto.TranslationDto;
 
+import javax.persistence.*;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
-/**
- * Created by Paweł Taborowski on 25.06.18.
- */
-public class Lessons {
+@Entity
+@Table(name = "Lessons")
+public class Lesson {
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     Integer lessonId;
     public String lessonTitle;
     public String filmTitle;
-    List<TranslationDto> translations = new LinkedList<>();
+    @OneToMany
+    List<Translation> translations = new LinkedList<>();
 
-    public Lessons(int lessonId, String lessonTitle, String filmTitle){
-        this.lessonId = lessonId;
+    public Lesson(){}
+
+    public Lesson(String lessonTitle, String filmTitle, List<Translation> translations){
         this.lessonTitle = lessonTitle;
         this.filmTitle = filmTitle;
-    }
-
-    public void addTranslation(String englishWord, String polishWord){
-        TranslationDto translationDto = new TranslationDto(englishWord, polishWord);
-        translations.add(translationDto);
+        this.translations = translations;
     }
 
     public LessonSummaryDto getSummary(){
@@ -32,6 +33,7 @@ public class Lessons {
     }
 
     public LessonDto getDto(){
-        return new LessonDto(lessonId, lessonTitle, filmTitle, translations);
+        List<TranslationDto> translationsDto = translations.stream().map(Translation::getDto).collect(Collectors.toList());
+        return new LessonDto(lessonId, lessonTitle, filmTitle, translationsDto);
     }
 }
