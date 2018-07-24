@@ -16,6 +16,8 @@ public class LessonDto {
         this.translations = translations;
     }
 
+    public LessonDto(){}
+
     public Integer getLessonId(){
         return lessonId;
     }

@@ -15,9 +15,14 @@ public class Lesson {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     Integer lessonId;
+
+    @Column(unique = true, nullable = false)
     public String lessonTitle;
+
+    @Column(nullable = false)
     public String filmTitle;
-    @OneToMany
+
+    @ManyToMany
     List<Translation> translations = new LinkedList<>();
 
     public Lesson(){}

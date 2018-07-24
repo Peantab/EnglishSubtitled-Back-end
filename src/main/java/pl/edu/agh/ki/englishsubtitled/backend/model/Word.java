@@ -8,6 +8,8 @@ public abstract class Word {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     Integer wordId;
+
+    @Column(unique = true, nullable = false)
     String word;
 
     public Word(){}

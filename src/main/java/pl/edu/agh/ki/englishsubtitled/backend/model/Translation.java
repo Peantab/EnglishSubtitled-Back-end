@@ -13,6 +13,7 @@ public class Translation {
 
     @ManyToOne
     EnglishWord englishWord;
+
     @ManyToOne
     PolishWord polishWord;
 

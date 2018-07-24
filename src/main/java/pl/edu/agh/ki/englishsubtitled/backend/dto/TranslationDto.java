@@ -8,4 +8,6 @@ public class TranslationDto {
         this.engWord = engWord;
         this.plWord = plWord;
     }
+
+    public TranslationDto(){}
 }
