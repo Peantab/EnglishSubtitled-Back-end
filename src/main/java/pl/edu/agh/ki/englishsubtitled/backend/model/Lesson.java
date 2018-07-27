@@ -23,7 +23,7 @@ public class Lesson {
     public String filmTitle;
 
     @ManyToMany
-    List<Translation> translations = new LinkedList<>();
+    public List<Translation> translations = new LinkedList<>();
 
     public Lesson(){}
 
@@ -40,5 +40,9 @@ public class Lesson {
     public LessonDto getDto(){
         List<TranslationDto> translationsDto = translations.stream().map(Translation::getDto).collect(Collectors.toList());
         return new LessonDto(lessonId, lessonTitle, filmTitle, translationsDto);
+    }
+
+    public Integer getLessonId() {
+        return lessonId;
     }
 }

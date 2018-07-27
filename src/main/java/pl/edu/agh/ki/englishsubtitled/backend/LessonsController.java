@@ -1,6 +1,7 @@
 package pl.edu.agh.ki.englishsubtitled.backend;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -62,10 +63,46 @@ public class LessonsController {
         return lesson.get().getDto();
     }
 
+    @RequestMapping(path = "/{lessonId}", method = RequestMethod.DELETE)
+    public void removeLesson(@PathVariable String lessonId){
+        int lessonIdInt;
+        try {
+            lessonIdInt = Integer.parseInt(lessonId);
+        } catch(NumberFormatException e){
+            throw new LessonIdInvalidException(lessonId);
+        }
+
+        try {
+            lessonRepository.deleteById(lessonIdInt);
+        }catch (EmptyResultDataAccessException e){
+            throw new LessonIdNotFoundException(lessonIdInt);
+        }
+    }
+
     @RequestMapping(method = RequestMethod.POST)
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public void addLessons(@RequestBody List<LessonDto> lessons){
         for (LessonDto lessonDto: lessons){
+            List<Translation> translations = getOrCreateTranslations(lessonDto.getTranslations());
+            Lesson lesson = new Lesson(lessonDto.lessonTitle, lessonDto.filmTitle, translations);
+            lessonRepository.save(lesson);
+        }
+    }
+
+    @RequestMapping(method = RequestMethod.PUT)
+    @Transactional(isolation = Isolation.SERIALIZABLE)
+    public void updateLessons(@RequestBody List<LessonDto> lessons){
+        for (LessonDto lessonDto: lessons){
+            Lesson existingLesson = lessonRepository.findByLessonTitleEquals(lessonDto.lessonTitle);
+
+            if (existingLesson != null){
+                if (existingLesson.getDto().equals(lessonDto)) continue;
+
+                existingLesson.lessonTitle = lessonDto.lessonTitle;
+                existingLesson.filmTitle = lessonDto.filmTitle;
+                existingLesson.translations = getOrCreateTranslations(lessonDto.getTranslations());
+                continue;
+            }
             List<Translation> translations = getOrCreateTranslations(lessonDto.getTranslations());
             Lesson lesson = new Lesson(lessonDto.lessonTitle, lessonDto.filmTitle, translations);
             lessonRepository.save(lesson);
