@@ -10,9 +10,11 @@ import pl.edu.agh.ki.englishsubtitled.backend.dto.LessonSummaryDto;
 import pl.edu.agh.ki.englishsubtitled.backend.dto.TranslationDto;
 import pl.edu.agh.ki.englishsubtitled.backend.exception.LessonIdInvalidException;
 import pl.edu.agh.ki.englishsubtitled.backend.exception.LessonIdNotFoundException;
+import pl.edu.agh.ki.englishsubtitled.backend.model.Film;
 import pl.edu.agh.ki.englishsubtitled.backend.model.Lesson;
 import pl.edu.agh.ki.englishsubtitled.backend.model.Translation;
 import pl.edu.agh.ki.englishsubtitled.backend.repository.LessonRepository;
+import pl.edu.agh.ki.englishsubtitled.backend.service.FilmService;
 import pl.edu.agh.ki.englishsubtitled.backend.service.TranslationService;
 
 import java.util.*;
@@ -23,13 +25,15 @@ import java.util.stream.Collectors;
 @RequestMapping("/lessons")
 public class LessonsController {
 
-    private LessonRepository lessonRepository;
-    private TranslationService translationService;
+    private final LessonRepository lessonRepository;
+    private final TranslationService translationService;
+    private final FilmService filmService;
 
     @Autowired
-    LessonsController(LessonRepository lessonRepository, TranslationService translationService){
+    LessonsController(LessonRepository lessonRepository, TranslationService translationService, FilmService filmService){
         this.lessonRepository = lessonRepository;
         this.translationService = translationService;
+        this.filmService = filmService;
     }
 
     private List<Translation> getOrCreateTranslations(List<TranslationDto> dtos){
@@ -38,12 +42,7 @@ public class LessonsController {
 
     @RequestMapping(method = RequestMethod.GET)
     public List<LessonSummaryDto> getLessons(){
-
-        List<LessonSummaryDto> lessonSummaries = new LinkedList<>();
-        for (Lesson lesson: lessonRepository.findAll()){
-            lessonSummaries.add(lesson.getSummary());
-        }
-        return lessonSummaries;
+        return lessonRepository.findAll().stream().map(Lesson::getSummary).collect(Collectors.toList());
     }
 
     @RequestMapping(path = "/{lessonId}", method = RequestMethod.GET)
@@ -83,9 +82,7 @@ public class LessonsController {
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public void addLessons(@RequestBody List<LessonDto> lessons){
         for (LessonDto lessonDto: lessons){
-            List<Translation> translations = getOrCreateTranslations(lessonDto.getTranslations());
-            Lesson lesson = new Lesson(lessonDto.lessonTitle, lessonDto.filmTitle, translations);
-            lessonRepository.save(lesson);
+            createLesson(lessonDto);
         }
     }
 
@@ -99,13 +96,18 @@ public class LessonsController {
                 if (existingLesson.getDto().equals(lessonDto)) continue;
 
                 existingLesson.lessonTitle = lessonDto.lessonTitle;
-                existingLesson.filmTitle = lessonDto.filmTitle;
+                existingLesson.film = filmService.getOrCreateFilm(lessonDto.filmTitle);
                 existingLesson.translations = getOrCreateTranslations(lessonDto.getTranslations());
                 continue;
             }
-            List<Translation> translations = getOrCreateTranslations(lessonDto.getTranslations());
-            Lesson lesson = new Lesson(lessonDto.lessonTitle, lessonDto.filmTitle, translations);
-            lessonRepository.save(lesson);
+            createLesson(lessonDto);
         }
+    }
+
+    private void createLesson(LessonDto lessonDto){
+        List<Translation> translations = getOrCreateTranslations(lessonDto.getTranslations());
+        Film film = filmService.getOrCreateFilm(lessonDto.filmTitle);
+        Lesson lesson = new Lesson(lessonDto.lessonTitle, film, translations);
+        lessonRepository.save(lesson);
     }
 }

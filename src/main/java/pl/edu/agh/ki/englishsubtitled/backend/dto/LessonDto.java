@@ -17,9 +17,9 @@ public class LessonDto {
         this.translations = translations;
     }
 
-    public LessonDto(){}
+    public LessonDto(){} //For Jackson to parse JSON
 
-    public Integer getLessonId(){
+    public Integer getLessonId(){ //For Jackson to generate a field
         return lessonId;
     }
 

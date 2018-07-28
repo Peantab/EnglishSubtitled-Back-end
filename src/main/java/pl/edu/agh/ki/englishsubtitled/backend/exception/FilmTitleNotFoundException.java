@@ -4,8 +4,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(value=HttpStatus.NOT_FOUND)
-public class LessonIdNotFoundException extends RuntimeException{
-    public LessonIdNotFoundException(int lessonId){
-        super("There is no lesson with a lessonId "+lessonId+".");
+public class FilmTitleNotFoundException extends RuntimeException{
+    public FilmTitleNotFoundException(String filmTitle){
+        super("There is no film with a title \"" + filmTitle + "\".");
     }
 }

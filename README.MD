@@ -9,7 +9,18 @@ Aplikacja wymaga programów `docker` i `docker-compose` w celu uruchomienia bazy
 
 ### Przykładowe lekcje
 
-Aby dodać do bazy danych aplikacji przykładowe lekcje, należy wykonać skrypt `skrypty/testoweLekcje.sh` (wymaga programu `curl` i systemu Linux/Mac) lub wykonać zawarte w nim zapytanie w inny sposób. 
+Aby dodać do bazy danych aplikacji przykładowe lekcje, należy wykonać skrypt `skrypty/testoweLekcje.sh` (wymaga programu `curl` i systemu Linux/Mac) lub wykonać zawarte w nim zapytanie w inny sposób.
+
+## API
+
+Pogrubione wpisy są szczególnie istotne dla klienta.
+* **`lessons` [GET]** - lista wszystkich lekcji, bez tłumaczeń;
+* `lessons` [POST] - tworzenie nowych lekcji na podstawie listy obiektów zawartej w treści żądania;
+* `lessons` [PUT] - tworzenie lub modyfikacja istniejących lekcji na podstawie listy obiektów zawartej w treści żądania;
+* **`lessons/{lessonId}` [GET]** - pełna reprezentacja pojedynczej lekcji (wraz z tłumaczeniami);
+* `lessons/{lessonId}` [DELETE] - usuwanie lekcji o ID lessonId;
+* **`films` [GET]** - lista wszystkich filmów, każdy film zawiera listę wszystich związanych z nim lekcji (bez tłumaczeń) - stąd wynik zapytania zawiera wszystkie lekcje;
+* **`films/{filmTitle}` [GET]** - pojedynczy film, o tytule filmTitle, z listy zwracanej przez `films` [GET].
 
 ## Autorzy
 Justyna Maciąg, Paweł Taborowski, Agnieszka Warchoł

@@ -1,5 +1,6 @@
 package pl.edu.agh.ki.englishsubtitled.backend;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -34,6 +35,11 @@ public class LessonsControllerTests {
         mockMvc = MockMvcBuilders.standaloneSetup(lessonsController).build();
     }
 
+    @After
+    public void tearDown(){
+        lessonRepository.deleteAll();
+    }
+
     @Test
     public void addSingleLessonFullDto(){
         try{
@@ -60,7 +66,6 @@ public class LessonsControllerTests {
         lessonRepository.flush();
         Lesson lesson = lessonRepository.findByLessonTitleEquals("Ala ma kota");
         assertNotNull(lesson);
-        lessonRepository.delete(lesson);
     }
 
     @Test
@@ -88,7 +93,6 @@ public class LessonsControllerTests {
         lessonRepository.flush();
         Lesson lesson = lessonRepository.findByLessonTitleEquals("Ala ma kota");
         assertNotNull(lesson);
-        lessonRepository.delete(lesson);
     }
 
     @Test(expected = NestedServletException.class)
@@ -109,7 +113,6 @@ public class LessonsControllerTests {
                 "\t}]\n" +
                 "}]"));
         Lesson lesson = lessonRepository.findByLessonTitleEquals("Ala ma kota");
-        lessonRepository.delete(lesson);
     }
 
     @Test(expected = NestedServletException.class)
@@ -139,8 +142,6 @@ public class LessonsControllerTests {
                 "\t}]\n" +
                 "}]"));
         lessonRepository.flush();
-        Lesson lesson = lessonRepository.findByLessonTitleEquals("Ala ma kota");
-        lessonRepository.delete(lesson);
     }
 
     @Test
@@ -175,9 +176,6 @@ public class LessonsControllerTests {
             fail();
         }catch (NestedServletException e){
             // It should be thrown
-        }finally{
-            Lesson lesson = lessonRepository.findByLessonTitleEquals("Ala ma kota");
-            lessonRepository.delete(lesson);
         }
     }
 
@@ -206,7 +204,6 @@ public class LessonsControllerTests {
         lessonRepository.flush();
         Lesson lesson = lessonRepository.findByLessonTitleEquals("Ala ma kota");
         assertNotNull(lesson);
-        lessonRepository.delete(lesson);
     }
 
     @Test

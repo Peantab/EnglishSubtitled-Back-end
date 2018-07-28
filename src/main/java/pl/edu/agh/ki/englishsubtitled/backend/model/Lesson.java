@@ -19,27 +19,27 @@ public class Lesson {
     @Column(unique = true, nullable = false)
     public String lessonTitle;
 
-    @Column(nullable = false)
-    public String filmTitle;
+    @ManyToOne
+    public Film film;
 
     @ManyToMany
     public List<Translation> translations = new LinkedList<>();
 
     public Lesson(){}
 
-    public Lesson(String lessonTitle, String filmTitle, List<Translation> translations){
+    public Lesson(String lessonTitle, Film film, List<Translation> translations){
         this.lessonTitle = lessonTitle;
-        this.filmTitle = filmTitle;
+        this.film = film;
         this.translations = translations;
     }
 
     public LessonSummaryDto getSummary(){
-        return new LessonSummaryDto(lessonId, lessonTitle, filmTitle);
+        return new LessonSummaryDto(lessonId, lessonTitle, film.getFilmTitle());
     }
 
     public LessonDto getDto(){
         List<TranslationDto> translationsDto = translations.stream().map(Translation::getDto).collect(Collectors.toList());
-        return new LessonDto(lessonId, lessonTitle, filmTitle, translationsDto);
+        return new LessonDto(lessonId, lessonTitle, film.getFilmTitle(), translationsDto);
     }
 
     public Integer getLessonId() {
