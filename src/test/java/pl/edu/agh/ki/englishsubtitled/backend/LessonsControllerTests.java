@@ -59,7 +59,7 @@ public class LessonsControllerTests {
                     "\t\t\"engWord\": \"cat\",\n" +
                     "\t\t\"plWord\": \"kot\"\n" +
                     "\t}]\n" +
-                    "}]"));
+                    "}]").header("Authorization", "mock"));
         }catch (Exception e){
             fail();
         }
@@ -86,7 +86,7 @@ public class LessonsControllerTests {
                     "\t\t\"engWord\": \"cat\",\n" +
                     "\t\t\"plWord\": \"kot\"\n" +
                     "\t}]\n" +
-                    "}]"));
+                    "}]").header("Authorization", "mock"));
         }catch (Exception e){
             fail();
         }
@@ -111,8 +111,8 @@ public class LessonsControllerTests {
                 "\t\t\"engWord\": \"cat\",\n" +
                 "\t\t\"plWord\": \"kot\"\n" +
                 "\t}]\n" +
-                "}]"));
-        Lesson lesson = lessonRepository.findByLessonTitleEquals("Ala ma kota");
+                "}]").header("Authorization", "mock"));
+        lessonRepository.findByLessonTitleEquals("Ala ma kota");
     }
 
     @Test(expected = NestedServletException.class)
@@ -140,7 +140,7 @@ public class LessonsControllerTests {
                 "\t\t\"engWord\": \"Alice\",\n" +
                 "\t\t\"plWord\": \"Ala\"\n" +
                 "\t}]\n" +
-                "}]"));
+                "}]").header("Authorization", "mock"));
         lessonRepository.flush();
     }
 
@@ -162,7 +162,7 @@ public class LessonsControllerTests {
                     "\t\t\"engWord\": \"cat\",\n" +
                     "\t\t\"plWord\": \"kot\"\n" +
                     "\t}]\n" +
-                    "}]"));
+                    "}]").header("Authorization", "mock"));
             lessonRepository.flush();
             mockMvc.perform(MockMvcRequestBuilders.post("/lessons").contentType(MediaType.APPLICATION_JSON).content("[{\n" +
                     "\t\"lessonTitle\": \"Ala ma kota\",\n" +
@@ -171,7 +171,7 @@ public class LessonsControllerTests {
                     "\t\t\"engWord\": \"cat\",\n" +
                     "\t\t\"plWord\": \"kot\"\n" +
                     "\t}]\n" +
-                    "}]"));
+                    "}]").header("Authorization", "mock"));
             lessonRepository.flush();
             fail();
         }catch (NestedServletException e){
@@ -197,7 +197,7 @@ public class LessonsControllerTests {
                     "\t\t\"engWord\": \"Alice\",\n" +
                     "\t\t\"plWord\": \"Alicja\"\n" +
                     "\t}]\n" +
-                    "}]"));
+                    "}]").header("Authorization", "mock"));
         }catch (Exception e){
             fail();
         }
@@ -224,7 +224,7 @@ public class LessonsControllerTests {
                 "\t\t\"engWord\": \"cat\",\n" +
                 "\t\t\"plWord\": \"kot\"\n" +
                 "\t}]\n" +
-                "}]"));
+                "}]").header("Authorization", "mock"));
         lessonRepository.flush();
         Integer lessonId = lessonRepository.findByLessonTitleEquals("Ala ma kota").getLessonId();
 
@@ -239,7 +239,7 @@ public class LessonsControllerTests {
                 "\t\t\"engWord\": \"cat\",\n" +
                 "\t\t\"plWord\": \"kot\"\n" +
                 "\t}]\n" +
-                "}]"));
+                "}]").header("Authorization", "mock"));
 
         lessonRepository.flush();
         Lesson updatedLesson = lessonRepository.findByLessonTitleEquals("Ala ma kota");
@@ -269,14 +269,14 @@ public class LessonsControllerTests {
                 "\t\t\"engWord\": \"cat\",\n" +
                 "\t\t\"plWord\": \"kot\"\n" +
                 "\t}]\n" +
-                "}]"));
+                "}]").header("Authorization", "mock"));
         lessonRepository.flush();
 
         Lesson lesson = lessonRepository.findByLessonTitleEquals("Ala ma kota");
         assertNotNull("Failed to create a lesson!", lesson);
         int lessonId = lesson.getLessonId();
 
-        mockMvc.perform(MockMvcRequestBuilders.delete(String.format("/lessons/%d", lessonId)));
+        mockMvc.perform(MockMvcRequestBuilders.delete(String.format("/lessons/%d", lessonId)).header("Authorization", "mock"));
         lessonRepository.flush();
 
         Lesson lessonAfterRemoval = lessonRepository.findByLessonTitleEquals("Ala ma kota");
@@ -308,11 +308,11 @@ public class LessonsControllerTests {
                 "\t\t\"engWord\": \"dog\",\n" +
                 "\t\t\"plWord\": \"pies\"\n" +
                 "\t}]\n" +
-                "}]"));
+                "}]").header("Authorization", "mock"));
         lessonRepository.flush();
         int lessonId = lessonRepository.findByLessonTitleEquals("Ala ma kota").getLessonId();
 
-        mockMvc.perform(MockMvcRequestBuilders.delete(String.format("/lessons/%d", lessonId)));
+        mockMvc.perform(MockMvcRequestBuilders.delete(String.format("/lessons/%d", lessonId)).header("Authorization", "mock"));
         lessonRepository.flush();
 
         Lesson lessonRemoved = lessonRepository.findByLessonTitleEquals("Ala ma kota");

@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.core.env.Environment;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -44,9 +43,6 @@ public class FilmsControllerTests {
     @Autowired
     FilmsController filmsController;
 
-    @Autowired
-    Environment environment;
-
     @LocalServerPort
     private int port;
 
@@ -64,7 +60,7 @@ public class FilmsControllerTests {
     @Test
     public void gettingSingleFilmTest(){
         try{
-            mockMvc.perform(MockMvcRequestBuilders.post("/lessons").contentType(MediaType.APPLICATION_JSON).content("[{\n" +
+            int status = mockMvc.perform(MockMvcRequestBuilders.post("/lessons").contentType(MediaType.APPLICATION_JSON).content("[{\n" +
                     "\t\"lessonTitle\": \"Ala ma kota\",\n" +
                     "\t\"filmTitle\": \"Ala ma kota The Movie\",\n" +
                     "\t\"translations\": [{\n" +
@@ -79,7 +75,8 @@ public class FilmsControllerTests {
                     "\t\t\"engWord\": \"cat\",\n" +
                     "\t\t\"plWord\": \"kot\"\n" +
                     "\t}]\n" +
-                    "}]"));
+                    "}]").header("Authorization", "mock")).andReturn().getResponse().getStatus();
+            assertEquals(200, status);
         }catch (Exception e){
             fail();
         }
@@ -122,7 +119,7 @@ public class FilmsControllerTests {
                     "\t\t\"engWord\": \"dog\",\n" +
                     "\t\t\"plWord\": \"pies\"\n" +
                     "\t}]\n" +
-                    "}]"));
+                    "}]").header("Authorization", "mock"));
         }catch (Exception e){
             fail();
         }
@@ -176,7 +173,7 @@ public class FilmsControllerTests {
                     "\t\t\"engWord\": \"dog\",\n" +
                     "\t\t\"plWord\": \"pies\"\n" +
                     "\t}]\n" +
-                    "}]"));
+                    "}]").header("Authorization", "mock"));
         }catch (Exception e){
             fail();
         }

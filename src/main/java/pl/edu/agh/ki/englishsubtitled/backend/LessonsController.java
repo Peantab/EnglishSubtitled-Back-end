@@ -16,6 +16,7 @@ import pl.edu.agh.ki.englishsubtitled.backend.model.Translation;
 import pl.edu.agh.ki.englishsubtitled.backend.repository.LessonRepository;
 import pl.edu.agh.ki.englishsubtitled.backend.service.FilmService;
 import pl.edu.agh.ki.englishsubtitled.backend.service.TranslationService;
+import pl.edu.agh.ki.englishsubtitled.backend.service.UserService;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -28,12 +29,14 @@ public class LessonsController {
     private final LessonRepository lessonRepository;
     private final TranslationService translationService;
     private final FilmService filmService;
+    private final UserService userService;
 
     @Autowired
-    LessonsController(LessonRepository lessonRepository, TranslationService translationService, FilmService filmService){
+    LessonsController(LessonRepository lessonRepository, TranslationService translationService, FilmService filmService, UserService userService){
         this.lessonRepository = lessonRepository;
         this.translationService = translationService;
         this.filmService = filmService;
+        this.userService = userService;
     }
 
     private List<Translation> getOrCreateTranslations(List<TranslationDto> dtos){
@@ -46,7 +49,8 @@ public class LessonsController {
     }
 
     @RequestMapping(path = "/{lessonId}", method = RequestMethod.GET)
-    public LessonDto getLesson(@PathVariable String lessonId){
+    public LessonDto getLesson(@RequestHeader("Authorization") String token, @PathVariable String lessonId){
+        userService.authenticate(token, true);
         int lessonIdInt;
         try {
             lessonIdInt = Integer.parseInt(lessonId);
@@ -63,7 +67,8 @@ public class LessonsController {
     }
 
     @RequestMapping(path = "/{lessonId}", method = RequestMethod.DELETE)
-    public void removeLesson(@PathVariable String lessonId){
+    public void removeLesson(@RequestHeader("Authorization") String token, @PathVariable String lessonId){
+        userService.authenticateAdmin(token);
         int lessonIdInt;
         try {
             lessonIdInt = Integer.parseInt(lessonId);
@@ -80,7 +85,8 @@ public class LessonsController {
 
     @RequestMapping(method = RequestMethod.POST)
     @Transactional(isolation = Isolation.SERIALIZABLE)
-    public void addLessons(@RequestBody List<LessonDto> lessons){
+    public void addLessons(@RequestHeader("Authorization") String token, @RequestBody List<LessonDto> lessons){
+        userService.authenticateAdmin(token);
         for (LessonDto lessonDto: lessons){
             createLesson(lessonDto);
         }
@@ -88,7 +94,8 @@ public class LessonsController {
 
     @RequestMapping(method = RequestMethod.PUT)
     @Transactional(isolation = Isolation.SERIALIZABLE)
-    public void updateLessons(@RequestBody List<LessonDto> lessons){
+    public void updateLessons(@RequestHeader("Authorization") String token, @RequestBody List<LessonDto> lessons){
+        userService.authenticateAdmin(token);
         for (LessonDto lessonDto: lessons){
             Lesson existingLesson = lessonRepository.findByLessonTitleEquals(lessonDto.lessonTitle);
 
