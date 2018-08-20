@@ -16,16 +16,23 @@ def main():
 
 def menu():
     while True:
+        print('0. Init (odpowiednik 1+2)')
         print('1. Wstaw admina do bazy')
         print('2. Wstaw przykładowe lekcje do bazy')
+        print('3. Zmodyfikuj przykładowe lekcje wstawione [2] (test /lessons PUT)')
         print('q. Wyjdź')
         print()
         choice = input("Wybór: ")
 
-        if choice == '1':
+        if choice == '0':
+            insert_admin()
+            test_lessons()
+        elif choice == '1':
             insert_admin()
         elif choice == '2':
             test_lessons()
+        elif choice == '3':
+            modify_lessons()
         elif choice == 'q':
             exit(0)
         else:
@@ -107,6 +114,52 @@ def test_lessons():
                 {
                     "engWord": "live",
                     "plWord": "żyć"
+                }
+            ]
+        }
+    ], headers={'Authorization': FACEBOOK_TOKEN})
+    print(str(r.status_code) + " " + str(r.content))
+
+
+def modify_lessons():
+    r = requests.put(url="http://localhost:8080/lessons", json=[
+        {
+            "lessonTitle": "Big Buck Bunny - full transcription",
+            "filmTitle": "Big Buck Bunny",
+            "translations": [
+                {
+                    "engWord": "big",
+                    "plWord": "wielki"
+                },
+                {
+                    "engWord": "buck",
+                    "plWord": "bryknięcie"
+                },
+                {
+                    "engWord": "bunny",
+                    "plWord": "królik"
+                }
+            ]
+        },
+        {
+            "lessonTitle": "Mock Movie with words by Justyna",
+            "filmTitle": "Mock Movie",
+            "translations": [
+                {
+                    "engWord": "home",
+                    "plWord": "ojczyzna"
+                },
+                {
+                    "engWord": "bag",
+                    "plWord": "torba"
+                },
+                {
+                    "engWord": "computer",
+                    "plWord": "komputer"
+                },
+                {
+                    "engWord": "bike",
+                    "plWord": "rower"
                 }
             ]
         }

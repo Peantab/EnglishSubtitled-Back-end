@@ -10,6 +10,7 @@ import pl.edu.agh.ki.englishsubtitled.backend.dto.LessonSummaryDto;
 import pl.edu.agh.ki.englishsubtitled.backend.dto.TranslationDto;
 import pl.edu.agh.ki.englishsubtitled.backend.exception.LessonIdInvalidException;
 import pl.edu.agh.ki.englishsubtitled.backend.exception.LessonIdNotFoundException;
+import pl.edu.agh.ki.englishsubtitled.backend.exception.LessonPostingException;
 import pl.edu.agh.ki.englishsubtitled.backend.model.Film;
 import pl.edu.agh.ki.englishsubtitled.backend.model.Lesson;
 import pl.edu.agh.ki.englishsubtitled.backend.model.Translation;
@@ -87,8 +88,12 @@ public class LessonsController {
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public void addLessons(@RequestHeader("Authorization") String token, @RequestBody List<LessonDto> lessons){
         userService.authenticateAdmin(token);
-        for (LessonDto lessonDto: lessons){
-            createLesson(lessonDto);
+        try {
+            for (LessonDto lessonDto : lessons) {
+                createLesson(lessonDto);
+            }
+        }catch (RuntimeException e){
+            throw new LessonPostingException(e);
         }
     }
 
