@@ -9,7 +9,7 @@ Aplikacja wymaga programów `docker` i `docker-compose` w celu uruchomienia bazy
 
 ### Przykładowe lekcje
 
-Aby dodać do bazy danych aplikacji przykładowe lekcje, należy wykonać skrypt `skrypty/testoweLekcje.sh` (wymaga programu `curl` i systemu Linux/Mac) lub wykonać zawarte w nim zapytanie w inny sposób.
+Aby dodać do bazy danych aplikacji przykładowe lekcje, należy wykonać skrypt `skrypty/skrypty.py` (wymaga `Python 3` z biblioteką `Requests`) lub wykonać zawarte w nim zapytanie w inny sposób.
 
 ## API
 
@@ -24,6 +24,8 @@ Wszystkie endpointy oprócz `lessons` [GET] wymagają nagłówka `Authorization`
 * `lessons/{lessonId}` [DELETE] - usuwanie lekcji o ID lessonId *[Wymaga uprawnień admina]*;
 * **`films` [GET]** - lista wszystkich filmów, każdy film zawiera listę wszystich związanych z nim lekcji (bez tłumaczeń) - stąd wynik zapytania zawiera wszystkie lekcje;
 * **`films/{filmTitle}` [GET]** - pojedynczy film, o tytule filmTitle, z listy zwracanej przez `films` [GET].
+* **`bookmarks` [GET]** - lista słówek dodanych przez zautoryzowanego w tym zapytaniu użytkownika do słownika.
+* **`bookmarks` [PUT]** - dodawanie tłumaczenia (umieszczonego w *body*) do słownika zautoryzowanego w tym żądaniu użytkownika.
 
 ## Autorzy
 Justyna Maciąg, Paweł Taborowski, Agnieszka Warchoł

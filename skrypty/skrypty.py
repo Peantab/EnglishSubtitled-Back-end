@@ -18,8 +18,9 @@ def menu():
     while True:
         print('0. Init (odpowiednik 1+2)')
         print('1. Wstaw admina do bazy')
-        print('2. Wstaw przykładowe lekcje do bazy')
+        print('2. Wstaw przykładowe lekcje do bazy (wymaga [2])')
         print('3. Zmodyfikuj przykładowe lekcje wstawione [2] (test /lessons PUT)')
+        print('4. Dodaj zakładkę adminowi (wymaga [2], test /bookmarks PUT)')
         print('q. Wyjdź')
         print()
         choice = input("Wybór: ")
@@ -33,6 +34,8 @@ def menu():
             test_lessons()
         elif choice == '3':
             modify_lessons()
+        elif choice == '4':
+            add_bookmark()
         elif choice == 'q':
             exit(0)
         else:
@@ -164,6 +167,12 @@ def modify_lessons():
             ]
         }
     ], headers={'Authorization': FACEBOOK_TOKEN})
+    print(str(r.status_code) + " " + str(r.content))
+
+
+def add_bookmark():
+    r = requests.put(url="http://localhost:8080/bookmarks", json={"engWord": "bag", "plWord": "torba"},
+                     headers={'Authorization': FACEBOOK_TOKEN})
     print(str(r.status_code) + " " + str(r.content))
 
 
