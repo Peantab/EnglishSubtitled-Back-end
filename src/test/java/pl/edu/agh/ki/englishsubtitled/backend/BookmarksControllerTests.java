@@ -1,7 +1,6 @@
 package pl.edu.agh.ki.englishsubtitled.backend;
 
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,11 +37,6 @@ public class BookmarksControllerTests {
 
     @Autowired
     UserRepository userRepository;
-
-    @Before
-    public void setUp() {
-
-    }
 
     @After
     public void tearDown(){

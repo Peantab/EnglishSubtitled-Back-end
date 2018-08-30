@@ -5,6 +5,8 @@ import pl.edu.agh.ki.englishsubtitled.backend.dto.TranslationDto;
 import javax.persistence.*;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Entity
@@ -17,6 +19,9 @@ public class User {
     @Column(unique = true, nullable = false)
     String facebookUserId;
 
+    @OneToMany(mappedBy = "user")
+    List<LessonState> lessonStates;
+
     boolean admin = false;
 
     @ManyToMany
@@ -27,6 +32,7 @@ public class User {
     public User(String facebookUserId){
         this.facebookUserId = facebookUserId;
         bookmarkedTranslations = new LinkedList<>();
+        lessonStates = new LinkedList<>();
     }
 
     public boolean isAdmin() {
@@ -45,5 +51,34 @@ public class User {
 
     public void removeBookmark(Translation translation){
         bookmarkedTranslations.remove(translation);
+    }
+
+    public void addRental(LessonState lessonState){
+        lessonStates.add(lessonState);
+    }
+
+    public void removeRental(LessonState lessonState){
+        lessonStates.remove(lessonState);
+    }
+
+    public Optional<LessonState> getLessonState(Integer lessonId){
+        for (LessonState lessonState: lessonStates){
+            if (lessonState.getLesson().getLessonId().equals(lessonId)){
+                return Optional.of(lessonState);
+            }
+        }
+        return Optional.empty();
+    }
+
+    public Set<Lesson> getRelatedLessons(){
+        return lessonStates.stream().map(LessonState::getLesson).collect(Collectors.toSet());
+    }
+
+    public Set<Lesson> getRentedLessons(){
+        return lessonStates.stream().filter(l->l.getState() == LessonState.State.RENTED).map(LessonState::getLesson).collect(Collectors.toSet());
+    }
+
+    public Set<Lesson> getFinishedLessons(){
+        return lessonStates.stream().filter(l->l.getState() == LessonState.State.FINISHED).map(LessonState::getLesson).collect(Collectors.toSet());
     }
 }

@@ -11,10 +11,10 @@ import pl.edu.agh.ki.englishsubtitled.backend.dto.TranslationDto;
 import pl.edu.agh.ki.englishsubtitled.backend.exception.LessonIdInvalidException;
 import pl.edu.agh.ki.englishsubtitled.backend.exception.LessonIdNotFoundException;
 import pl.edu.agh.ki.englishsubtitled.backend.exception.LessonPostingException;
-import pl.edu.agh.ki.englishsubtitled.backend.model.Film;
-import pl.edu.agh.ki.englishsubtitled.backend.model.Lesson;
-import pl.edu.agh.ki.englishsubtitled.backend.model.Translation;
+import pl.edu.agh.ki.englishsubtitled.backend.exception.LessonRentalLimitExceededException;
+import pl.edu.agh.ki.englishsubtitled.backend.model.*;
 import pl.edu.agh.ki.englishsubtitled.backend.repository.LessonRepository;
+import pl.edu.agh.ki.englishsubtitled.backend.repository.LessonStateRepository;
 import pl.edu.agh.ki.englishsubtitled.backend.service.FilmService;
 import pl.edu.agh.ki.englishsubtitled.backend.service.TranslationService;
 import pl.edu.agh.ki.englishsubtitled.backend.service.UserService;
@@ -28,13 +28,16 @@ import java.util.stream.Collectors;
 public class LessonsController {
 
     private final LessonRepository lessonRepository;
+    private final LessonStateRepository lessonStateRepository;
     private final TranslationService translationService;
     private final FilmService filmService;
     private final UserService userService;
 
     @Autowired
-    LessonsController(LessonRepository lessonRepository, TranslationService translationService, FilmService filmService, UserService userService){
+    LessonsController(LessonRepository lessonRepository, LessonStateRepository lessonStateRepository,
+                      TranslationService translationService, FilmService filmService, UserService userService){
         this.lessonRepository = lessonRepository;
+        this.lessonStateRepository = lessonStateRepository;
         this.translationService = translationService;
         this.filmService = filmService;
         this.userService = userService;
@@ -51,7 +54,7 @@ public class LessonsController {
 
     @RequestMapping(path = "/{lessonId}", method = RequestMethod.GET)
     public LessonDto getLesson(@RequestHeader("Authorization") String token, @PathVariable String lessonId){
-        userService.authenticate(token, true);
+        User user = userService.authenticate(token, true);
         int lessonIdInt;
         try {
             lessonIdInt = Integer.parseInt(lessonId);
@@ -59,12 +62,22 @@ public class LessonsController {
             throw new LessonIdInvalidException(lessonId);
         }
 
-        Optional<Lesson> lesson = lessonRepository.findById(lessonIdInt);
+        Optional<Lesson> lessonOptional = lessonRepository.findById(lessonIdInt);
 
-        if(!lesson.isPresent()) {
+        if(!lessonOptional.isPresent()) {
             throw new LessonIdNotFoundException(lessonIdInt);
         }
-        return lesson.get().getDto();
+
+        if (!user.getRelatedLessons().contains(lessonOptional.get())){
+            if (user.getRentedLessons().size() + 1 >= Configuration.getInstance().getRentedLessonsLimit()){
+                throw new LessonRentalLimitExceededException();
+            }else{
+                LessonState lessonState = new LessonState(user, lessonOptional.get());
+                user.addRental(lessonState);
+                lessonStateRepository.saveAndFlush(lessonState);
+            }
+        }
+        return lessonOptional.get().getDto();
     }
 
     @RequestMapping(path = "/{lessonId}", method = RequestMethod.DELETE)
