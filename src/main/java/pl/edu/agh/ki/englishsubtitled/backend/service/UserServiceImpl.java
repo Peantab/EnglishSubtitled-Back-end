@@ -8,18 +8,23 @@ import pl.edu.agh.ki.englishsubtitled.backend.dto.FacebookMeResponse;
 import pl.edu.agh.ki.englishsubtitled.backend.exception.AdminPrivilegesRequiredException;
 import pl.edu.agh.ki.englishsubtitled.backend.exception.AuthenticationException;
 import pl.edu.agh.ki.englishsubtitled.backend.model.User;
+import pl.edu.agh.ki.englishsubtitled.backend.model.UserStatistics;
 import pl.edu.agh.ki.englishsubtitled.backend.repository.UserRepository;
+import pl.edu.agh.ki.englishsubtitled.backend.repository.UserStatisticsRepository;
 
 @Service
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final UserStatisticsRepository userStatisticsRepository;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository){
+    public UserServiceImpl(UserRepository userRepository, UserStatisticsRepository userStatisticsRepository){
         this.userRepository = userRepository;
+        this.userStatisticsRepository = userStatisticsRepository;
     }
 
+    @Override
     public User authenticate(String token, boolean required) {
         RestTemplate restTemplate = new RestTemplate();
         FacebookMeResponse facebookMeResponse;
@@ -38,7 +43,9 @@ public class UserServiceImpl implements UserService {
 
         if (user == null){
             user = new User(facebookUserId);
-            userRepository.save(user);
+            UserStatistics userStatistics = user.getUserStatistics();
+            userStatisticsRepository.saveAndFlush(userStatistics);
+            userRepository.saveAndFlush(user);
         }
 
         return user;

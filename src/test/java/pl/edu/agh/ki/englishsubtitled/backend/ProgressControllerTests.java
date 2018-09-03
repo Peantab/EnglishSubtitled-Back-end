@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
+import pl.edu.agh.ki.englishsubtitled.backend.dto.LessonResultsDto;
 import pl.edu.agh.ki.englishsubtitled.backend.dto.ProgressDto;
 import pl.edu.agh.ki.englishsubtitled.backend.exception.LessonNotRentedException;
 import pl.edu.agh.ki.englishsubtitled.backend.exception.LessonRentalLimitExceededException;
@@ -13,7 +14,6 @@ import pl.edu.agh.ki.englishsubtitled.backend.model.Film;
 import pl.edu.agh.ki.englishsubtitled.backend.model.Lesson;
 import pl.edu.agh.ki.englishsubtitled.backend.repository.FilmRepository;
 import pl.edu.agh.ki.englishsubtitled.backend.repository.LessonRepository;
-import pl.edu.agh.ki.englishsubtitled.backend.repository.LessonStateRepository;
 import pl.edu.agh.ki.englishsubtitled.backend.repository.UserRepository;
 
 import java.util.Collections;
@@ -31,9 +31,6 @@ public class ProgressControllerTests {
     LessonsController lessonsController;
 
     @Autowired
-    LessonStateRepository lessonStateRepository;
-
-    @Autowired
     LessonRepository lessonRepository;
 
     @Autowired
@@ -44,9 +41,10 @@ public class ProgressControllerTests {
 
     private int lesson1Id, lesson2Id, lesson3Id, lesson4Id;
     private Lesson lesson1, lesson2,lesson3, lesson4;
+    private LessonResultsDto lessonResult;
 
     @Before
-    public void setUp() {
+    public void setUp(){
         Film film = new Film("Film");
         filmRepository.saveAndFlush(film);
         lesson1 = new Lesson("Lesson1", film, Collections.emptyList());
@@ -62,17 +60,12 @@ public class ProgressControllerTests {
         lesson2Id = lesson2.getLessonId();
         lesson3Id = lesson3.getLessonId();
         lesson4Id = lesson4.getLessonId();
+        lessonResult = new LessonResultsDto();
         userRepository.deleteAll();
     }
 
     @After
     public void tearDown(){
-        lessonStateRepository.deleteAll();
-        lessonStateRepository.flush();
-        lessonRepository.deleteAll();
-        lessonRepository.flush();
-        filmRepository.deleteAll();
-        filmRepository.flush();
         userRepository.deleteAll();
         userRepository.flush();
     }
@@ -92,14 +85,14 @@ public class ProgressControllerTests {
     @Test(expected = LessonNotRentedException.class)
     @Transactional
     public void cantFinishNotRentedLesson(){
-        progressController.updateLessonState("user1", String.valueOf(lesson1Id));
+        progressController.updateLessonState("user1", String.valueOf(lesson1Id), lessonResult);
     }
 
     @Test
     @Transactional
     public void finishLesson(){
         lessonsController.getLesson("user1", String.valueOf(lesson2Id));
-        progressController.updateLessonState("user1", String.valueOf(lesson2Id));
+        progressController.updateLessonState("user1", String.valueOf(lesson2Id), lessonResult);
         ProgressDto progressDto = progressController.getProgress("user1");
         assertEquals(lesson2.getSummary(), progressDto.finished.get(0));
     }
@@ -111,7 +104,7 @@ public class ProgressControllerTests {
         ProgressDto progressDto = progressController.getProgress("user1");
         assertEquals(lesson2.getSummary(), progressDto.rented.get(0));
 
-        progressController.updateLessonState("user1", String.valueOf(lesson2Id));
+        progressController.updateLessonState("user1", String.valueOf(lesson2Id), lessonResult);
         progressDto = progressController.getProgress("user1");
         assertEquals(lesson2.getSummary(), progressDto.finished.get(0));
 
@@ -151,7 +144,7 @@ public class ProgressControllerTests {
     public void cancellingDoesntClearHistory(){
         lessonsController.getLesson("user1", String.valueOf(lesson2Id));
 
-        progressController.updateLessonState("user1", String.valueOf(lesson2Id));
+        progressController.updateLessonState("user1", String.valueOf(lesson2Id), lessonResult);
         ProgressDto progressDto = progressController.getProgress("user1");
         assertEquals(lesson2.getSummary(), progressDto.finished.get(0));
 
@@ -168,8 +161,8 @@ public class ProgressControllerTests {
         lessonsController.getLesson("user2", String.valueOf(lesson3Id));
         lessonsController.getLesson("user2", String.valueOf(lesson2Id));
 
-        progressController.updateLessonState("user1", String.valueOf(lesson2Id));
-        progressController.updateLessonState("user2", String.valueOf(lesson3Id));
+        progressController.updateLessonState("user1", String.valueOf(lesson2Id), lessonResult);
+        progressController.updateLessonState("user2", String.valueOf(lesson3Id), lessonResult);
 
         progressController.cancelRental("user2", String.valueOf(lesson2Id));
 

@@ -45,9 +45,12 @@ def menu():
 
 
 def insert_admin():
+    r = requests.get(url="http://localhost:8080/progress", headers={'Authorization': FACEBOOK_TOKEN})
+    print("Rejestrowanie użytkownika poprzez wykonanie zapytania 'progress' [GET]: " + str(r.status_code) + " " + str(r.content))
+    print("Ustawianie uprawnień admina: ")
     subprocess.run(['docker', 'exec', '-it', 'englishsubtitledbackend_db_1',
                     'psql', '-h', 'localhost', '-p', '5432', '-U', 'es_admin', 'english_subtitled',
-                    '-c', 'INSERT INTO users (user_id, admin, facebook_user_id) VALUES (1, TRUE, {});'.format(FACEBOOK_USER_ID)],
+                    '-c', 'UPDATE users SET admin=TRUE WHERE facebook_user_id=\'{}\';'.format(FACEBOOK_USER_ID)],
                    timeout=10)
 
 

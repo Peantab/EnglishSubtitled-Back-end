@@ -19,8 +19,11 @@ public class User {
     @Column(unique = true, nullable = false)
     String facebookUserId;
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
     List<LessonState> lessonStates;
+
+    @OneToOne(optional = false, cascade = CascadeType.REMOVE)
+    UserStatistics userStatistics;
 
     boolean admin = false;
 
@@ -33,10 +36,15 @@ public class User {
         this.facebookUserId = facebookUserId;
         bookmarkedTranslations = new LinkedList<>();
         lessonStates = new LinkedList<>();
+        userStatistics = UserStatistics.create();
     }
 
     public boolean isAdmin() {
         return admin;
+    }
+
+    public UserStatistics getUserStatistics(){
+        return userStatistics;
     }
 
     public List<TranslationDto> getTranslationDtos(){
