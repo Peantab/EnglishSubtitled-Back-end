@@ -24,12 +24,13 @@ Wszystkie endpointy oprócz `lessons` [GET] i `films` [GET] wymagają nagłówka
 * `lessons/{lessonId}` [DELETE] - usuwanie lekcji o ID lessonId *[Wymaga uprawnień admina]*;
 * **`films` [GET]** - lista wszystkich filmów, każdy film zawiera listę wszystich związanych z nim lekcji (bez tłumaczeń) - stąd wynik zapytania zawiera wszystkie lekcje;
 * **`films/{filmTitle}` [GET]** - pojedynczy film, o tytule filmTitle, z listy zwracanej przez `films` [GET];
-* **`bookmarks` [GET]** - lista słówek dodanych przez zautoryzowanego w tym zapytaniu użytkownika do słownika;
-* **`bookmarks` [PUT]** - dodawanie tłumaczenia (umieszczonego w *body*) do słownika zautoryzowanego w tym żądaniu użytkownika;
+* **`bookmarks` [GET]** - lista słówek dodanych przez zautentykowanego w tym zapytaniu użytkownika do słownika;
+* **`bookmarks` [PUT]** - dodawanie tłumaczenia (umieszczonego w *body*) do słownika zautentykowanego w tym żądaniu użytkownika;
 * **`progress` [GET]** - lista lekcji obecnie dostępnych dla użytkownika, z podziałem na wypożyczone i ukończone;
 * **`progress/{lessonId}` [PUT]** - przesłanie statystyk lekcji w *JSONie* w *request body*, będące jednocześnie stwierdzeniem ukończenia lekcji; zwraca listę odblokownych przez to osiągnięć *[struktura JSONa zostanie ustalona]*;
 * **`progress/{lessonId}` [DELETE]** - porzucenie postępu i oddanie nieukończonej pożyczonej lekcji (nie usuwa ukończonych lekcji);
 * **`achievements` [GET]** - lista osiągnięć zdobytych przez użytkownika (wraz z timestampem).
+* `users` [GET] - podsumowanie informacji o zautentykowanym użytkowniku (obecnie tylko czy jest administratorem).
 
 ## Autorzy
 Justyna Maciąg, Paweł Taborowski, Agnieszka Warchoł

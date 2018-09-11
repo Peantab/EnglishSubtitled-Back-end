@@ -1,6 +1,7 @@
 package pl.edu.agh.ki.englishsubtitled.backend.model;
 
 import pl.edu.agh.ki.englishsubtitled.backend.dto.TranslationDto;
+import pl.edu.agh.ki.englishsubtitled.backend.dto.UserDto;
 
 import javax.persistence.*;
 import java.util.LinkedList;
@@ -41,6 +42,10 @@ public class User {
 
     public boolean isAdmin() {
         return admin;
+    }
+
+    public UserDto getDto(){
+        return new UserDto(admin);
     }
 
     public UserStatistics getUserStatistics(){

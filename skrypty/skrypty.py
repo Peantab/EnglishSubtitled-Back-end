@@ -18,7 +18,7 @@ def menu():
     while True:
         print('0. Init (odpowiednik 1+2)')
         print('1. Wstaw admina do bazy')
-        print('2. Wstaw przykładowe lekcje do bazy (wymaga [2])')
+        print('2. Wstaw przykładowe lekcje do bazy (wymaga [1])')
         print('3. Zmodyfikuj przykładowe lekcje wstawione [2] (test /lessons PUT)')
         print('4. Dodaj zakładkę adminowi (wymaga [2], test /bookmarks PUT)')
         print('q. Wyjdź')
