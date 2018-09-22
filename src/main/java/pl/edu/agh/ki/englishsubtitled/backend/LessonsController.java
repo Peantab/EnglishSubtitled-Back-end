@@ -105,6 +105,7 @@ public class LessonsController {
             for (LessonDto lessonDto : lessons) {
                 createLesson(lessonDto);
             }
+            lessonRepository.flush();
         }catch (RuntimeException e){
             throw new LessonPostingException(e);
         }
