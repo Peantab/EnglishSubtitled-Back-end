@@ -6,13 +6,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.util.NestedServletException;
 import pl.edu.agh.ki.englishsubtitled.backend.model.Lesson;
 import pl.edu.agh.ki.englishsubtitled.backend.repository.LessonRepository;
 
@@ -95,9 +95,9 @@ public class LessonsControllerTests {
         assertNotNull(lesson);
     }
 
-    @Test(expected = NestedServletException.class)
+    @Test
     public void LessonWithNoTitleCannotBeAdded() throws Exception{
-        mockMvc.perform(MockMvcRequestBuilders.post("/lessons").contentType(MediaType.APPLICATION_JSON).content("[{\n" +
+        int status = mockMvc.perform(MockMvcRequestBuilders.post("/lessons").contentType(MediaType.APPLICATION_JSON).content("[{\n" +
                 "\t\"filmTitle\": \"Ala ma kota The Movie\",\n" +
                 "\t\"translations\": [{\n" +
                 "\t\t\"engWord\": \"Alice\",\n" +
@@ -111,13 +111,13 @@ public class LessonsControllerTests {
                 "\t\t\"engWord\": \"cat\",\n" +
                 "\t\t\"plWord\": \"kot\"\n" +
                 "\t}]\n" +
-                "}]").header("Authorization", "mock"));
-        lessonRepository.findByLessonTitleEquals("Ala ma kota");
+                "}]").header("Authorization", "mock")).andReturn().getResponse().getStatus();
+        assertEquals(HttpStatus.BAD_REQUEST.value() , status);
     }
 
-    @Test(expected = NestedServletException.class)
+    @Test
     public void oneLessonCannotBeAddedTwiceInOneRequest() throws Exception{
-        mockMvc.perform(MockMvcRequestBuilders.post("/lessons").contentType(MediaType.APPLICATION_JSON).content("[{\n" +
+        int status = mockMvc.perform(MockMvcRequestBuilders.post("/lessons").contentType(MediaType.APPLICATION_JSON).content("[{\n" +
                 "\t\"lessonTitle\": \"Ala ma kota\",\n" +
                 "\t\"filmTitle\": \"Ala ma kota The Movie\",\n" +
                 "\t\"translations\": [{\n" +
@@ -140,43 +140,40 @@ public class LessonsControllerTests {
                 "\t\t\"engWord\": \"Alice\",\n" +
                 "\t\t\"plWord\": \"Ala\"\n" +
                 "\t}]\n" +
-                "}]").header("Authorization", "mock"));
+                "}]").header("Authorization", "mock")).andReturn().getResponse().getStatus();
         lessonRepository.flush();
+        assertEquals(HttpStatus.BAD_REQUEST.value() , status);
     }
 
     @Test
     public void oneLessonCannotBeAddedTwiceInDifferentRequests() throws Exception {
-        try {
-            mockMvc.perform(MockMvcRequestBuilders.post("/lessons").contentType(MediaType.APPLICATION_JSON).content("[{\n" +
-                    "\t\"lessonTitle\": \"Ala ma kota\",\n" +
-                    "\t\"filmTitle\": \"Ala ma kota The Movie\",\n" +
-                    "\t\"translations\": [{\n" +
-                    "\t\t\"engWord\": \"Alice\",\n" +
-                    "\t\t\"plWord\": \"Ala\"\n" +
-                    "\t},\n" +
-                    "\t{\n" +
-                    "\t\t\"engWord\": \"have\",\n" +
-                    "\t\t\"plWord\": \"ma\"\n" +
-                    "\t},\n" +
-                    "\t{\n" +
-                    "\t\t\"engWord\": \"cat\",\n" +
-                    "\t\t\"plWord\": \"kot\"\n" +
-                    "\t}]\n" +
-                    "}]").header("Authorization", "mock"));
-            lessonRepository.flush();
-            mockMvc.perform(MockMvcRequestBuilders.post("/lessons").contentType(MediaType.APPLICATION_JSON).content("[{\n" +
-                    "\t\"lessonTitle\": \"Ala ma kota\",\n" +
-                    "\t\"filmTitle\": \"Ala ma kota The Movie\",\n" +
-                    "\t\"translations\": [{\n" +
-                    "\t\t\"engWord\": \"cat\",\n" +
-                    "\t\t\"plWord\": \"kot\"\n" +
-                    "\t}]\n" +
-                    "}]").header("Authorization", "mock"));
-            lessonRepository.flush();
-            fail();
-        }catch (NestedServletException e){
-            // It should be thrown
-        }
+        mockMvc.perform(MockMvcRequestBuilders.post("/lessons").contentType(MediaType.APPLICATION_JSON).content("[{\n" +
+                "\t\"lessonTitle\": \"Ala ma kota\",\n" +
+                "\t\"filmTitle\": \"Ala ma kota The Movie\",\n" +
+                "\t\"translations\": [{\n" +
+                "\t\t\"engWord\": \"Alice\",\n" +
+                "\t\t\"plWord\": \"Ala\"\n" +
+                "\t},\n" +
+                "\t{\n" +
+                "\t\t\"engWord\": \"have\",\n" +
+                "\t\t\"plWord\": \"ma\"\n" +
+                "\t},\n" +
+                "\t{\n" +
+                "\t\t\"engWord\": \"cat\",\n" +
+                "\t\t\"plWord\": \"kot\"\n" +
+                "\t}]\n" +
+                "}]").header("Authorization", "mock"));
+        lessonRepository.flush();
+        int status = mockMvc.perform(MockMvcRequestBuilders.post("/lessons").contentType(MediaType.APPLICATION_JSON).content("[{\n" +
+                "\t\"lessonTitle\": \"Ala ma kota\",\n" +
+                "\t\"filmTitle\": \"Ala ma kota The Movie\",\n" +
+                "\t\"translations\": [{\n" +
+                "\t\t\"engWord\": \"cat\",\n" +
+                "\t\t\"plWord\": \"kot\"\n" +
+                "\t}]\n" +
+                "}]").header("Authorization", "mock")).andReturn().getResponse().getStatus();;
+        lessonRepository.flush();
+        assertEquals(HttpStatus.BAD_REQUEST.value() , status);
     }
 
     @Test
