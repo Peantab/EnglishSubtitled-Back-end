@@ -26,6 +26,7 @@ Wszystkie endpointy oprócz `lessons` [GET] i `films` [GET] wymagają nagłówka
 * **`films/{filmTitle}` [GET]** - pojedynczy film, o tytule filmTitle, z listy zwracanej przez `films` [GET];
 * **`bookmarks` [GET]** - lista słówek dodanych przez zautentykowanego w tym zapytaniu użytkownika do słownika;
 * **`bookmarks` [PUT]** - dodawanie tłumaczenia (umieszczonego w *body*) do słownika zautentykowanego w tym żądaniu użytkownika;
+* **`bookmarks/remove` [PUT]** - usuwanie tłumaczenia (umieszczonego w *body*) ze słownika zautentykowanego w tym żądaniu użytkownika (zaimplementowane w ten sposób, gdyż DELETE nie musi wspierać *body*);
 * **`progress` [GET]** - lista lekcji obecnie dostępnych dla użytkownika, z podziałem na wypożyczone i ukończone;
 * **`progress/{lessonId}` [PUT]** - przesłanie statystyk lekcji w *JSONie* w *request body*, będące jednocześnie stwierdzeniem ukończenia lekcji; zwraca listę odblokownych przez to osiągnięć *[struktura JSONa zostanie ustalona]*;
 * **`progress/{lessonId}` [DELETE]** - porzucenie postępu i oddanie nieukończonej pożyczonej lekcji (nie usuwa ukończonych lekcji);

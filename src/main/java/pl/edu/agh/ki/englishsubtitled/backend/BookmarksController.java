@@ -40,7 +40,7 @@ public class BookmarksController {
         user.addBookmark(translation);
     }
 
-    @RequestMapping(method = RequestMethod.DELETE)
+    @RequestMapping(path = "/remove", method = RequestMethod.PUT)
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public void removeBookmark(@RequestHeader("Authorization") String token, @RequestBody TranslationDto translationDto){
         User user = userService.authenticate(token, true);
