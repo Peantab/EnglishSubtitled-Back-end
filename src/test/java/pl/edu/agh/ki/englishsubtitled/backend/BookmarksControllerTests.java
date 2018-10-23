@@ -103,7 +103,7 @@ public class BookmarksControllerTests {
         status = mockMvc.perform(MockMvcRequestBuilders.get("/bookmarks").contentType(MediaType.APPLICATION_JSON).header("Authorization", "test1")).andReturn().getResponse().getStatus();
         assertEquals("GET result", ok, status);
 
-        status = mockMvc.perform(MockMvcRequestBuilders.delete("/bookmarks").contentType(MediaType.APPLICATION_JSON).content("{\n" +
+        status = mockMvc.perform(MockMvcRequestBuilders.put("/bookmarks/remove").contentType(MediaType.APPLICATION_JSON).content("{\n" +
                 "\t\"engWord\": \"ala\",\n" +
                 "\t\"plWord\": \"makota\"\n" +
                 "}").header("Authorization", "test1")).andReturn().getResponse().getStatus();
