@@ -30,7 +30,7 @@ public class AchievementServiceImpl implements AchievementService {
     public void acceptLessonResults(User user, int lessonId, LessonResultsDto lessonResults) {
         UserStatistics userStatistics = user.getUserStatistics();
 
-        Set<Lesson> finishedLessons = user.getFinishedLessons();
+        List<Lesson> finishedLessons = user.getFinishedLessons();
         Set<Integer> finishedLessonsIds = finishedLessons.stream().map(Lesson::getLessonId).collect(Collectors.toSet());
         Integer cachedLessonId = lessonId;
         if (!finishedLessonsIds.contains(cachedLessonId)) userStatistics.increaseFinishedLessonsCountBy(1);

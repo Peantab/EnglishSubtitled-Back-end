@@ -11,7 +11,6 @@ import pl.edu.agh.ki.englishsubtitled.backend.dto.TranslationDto;
 import pl.edu.agh.ki.englishsubtitled.backend.exception.LessonIdInvalidException;
 import pl.edu.agh.ki.englishsubtitled.backend.exception.LessonIdNotFoundException;
 import pl.edu.agh.ki.englishsubtitled.backend.exception.LessonPostingException;
-import pl.edu.agh.ki.englishsubtitled.backend.exception.LessonRentalLimitExceededException;
 import pl.edu.agh.ki.englishsubtitled.backend.model.*;
 import pl.edu.agh.ki.englishsubtitled.backend.repository.FilmRepository;
 import pl.edu.agh.ki.englishsubtitled.backend.repository.LessonRepository;
@@ -74,12 +73,13 @@ public class LessonsController {
 
         if (!user.getRelatedLessons().contains(lessonOptional.get())){
             if (user.getRentedLessons().size() >= Configuration.getInstance().getRentedLessonsLimit()){
-                throw new LessonRentalLimitExceededException();
-            }else{
-                LessonState lessonState = new LessonState(user, lessonOptional.get());
-                user.addRental(lessonState);
-                lessonStateRepository.saveAndFlush(lessonState);
+                List<LessonState> lessonStates = user.makePlaceForRentedLesson();
+                lessonStateRepository.deleteAll(lessonStates);
             }
+
+            LessonState lessonState = new LessonState(user, lessonOptional.get());
+            user.addRental(lessonState);
+            lessonStateRepository.saveAndFlush(lessonState);
         }
         return lessonOptional.get().getDto();
     }

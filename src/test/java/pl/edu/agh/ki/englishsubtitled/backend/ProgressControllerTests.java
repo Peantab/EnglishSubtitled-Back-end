@@ -1,6 +1,8 @@
 package pl.edu.agh.ki.englishsubtitled.backend;
 
-import org.junit.*;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -9,16 +11,18 @@ import org.springframework.transaction.annotation.Transactional;
 import pl.edu.agh.ki.englishsubtitled.backend.dto.LessonResultsDto;
 import pl.edu.agh.ki.englishsubtitled.backend.dto.ProgressDto;
 import pl.edu.agh.ki.englishsubtitled.backend.exception.LessonNotRentedException;
-import pl.edu.agh.ki.englishsubtitled.backend.exception.LessonRentalLimitExceededException;
 import pl.edu.agh.ki.englishsubtitled.backend.model.Film;
 import pl.edu.agh.ki.englishsubtitled.backend.model.Lesson;
 import pl.edu.agh.ki.englishsubtitled.backend.repository.FilmRepository;
 import pl.edu.agh.ki.englishsubtitled.backend.repository.LessonRepository;
 import pl.edu.agh.ki.englishsubtitled.backend.repository.UserRepository;
 
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -113,14 +117,17 @@ public class ProgressControllerTests {
         assertTrue("Finished lesson cannot appear on the rented list.",progressDto.rented.isEmpty());
     }
 
-    @Test(expected = LessonRentalLimitExceededException.class)
+    @Test
     @Transactional
     public void cantRentMoreLessonsThanLimit(){
         assertTrue("This test assumed that rented books limit is no greater than 3, please update the test.", Configuration.getInstance().getRentedLessonsLimit() < 4);
-        lessonsController.getLesson("user1", String.valueOf(lesson1Id));
         lessonsController.getLesson("user1", String.valueOf(lesson2Id));
         lessonsController.getLesson("user1", String.valueOf(lesson3Id));
         lessonsController.getLesson("user1", String.valueOf(lesson4Id));
+        lessonsController.getLesson("user1", String.valueOf(lesson1Id));
+        List<Lesson> rentedLessons = userRepository.findFirstByFacebookUserId("user1").getRentedLessons();
+        assertEquals(3, rentedLessons.size());
+        assertTrue("Rented lessons collection should contain the newest rented lessons.", rentedLessons.containsAll(Arrays.asList(lesson3, lesson4, lesson1)));
     }
 
     @Test

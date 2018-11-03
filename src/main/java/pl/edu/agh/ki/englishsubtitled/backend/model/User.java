@@ -1,13 +1,11 @@
 package pl.edu.agh.ki.englishsubtitled.backend.model;
 
+import pl.edu.agh.ki.englishsubtitled.backend.Configuration;
 import pl.edu.agh.ki.englishsubtitled.backend.dto.TranslationDto;
 import pl.edu.agh.ki.englishsubtitled.backend.dto.UserDto;
 
 import javax.persistence.*;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Entity
@@ -21,6 +19,7 @@ public class User {
     String facebookUserId;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
+    @OrderColumn
     List<LessonState> lessonStates;
 
     @OneToOne(optional = false, cascade = CascadeType.REMOVE)
@@ -83,15 +82,28 @@ public class User {
         return Optional.empty();
     }
 
-    public Set<Lesson> getRelatedLessons(){
-        return lessonStates.stream().map(LessonState::getLesson).collect(Collectors.toSet());
+    public List<Lesson> getRelatedLessons(){
+        return lessonStates.stream().map(LessonState::getLesson).collect(Collectors.toList());
     }
 
-    public Set<Lesson> getRentedLessons(){
-        return lessonStates.stream().filter(l->l.getState() == LessonState.State.RENTED).map(LessonState::getLesson).collect(Collectors.toSet());
+    public List<Lesson> getRentedLessons(){
+        return lessonStates.stream().filter(l->l.getState() == LessonState.State.RENTED).map(LessonState::getLesson).collect(Collectors.toList());
     }
 
-    public Set<Lesson> getFinishedLessons(){
-        return lessonStates.stream().filter(l->l.getState() == LessonState.State.FINISHED).map(LessonState::getLesson).collect(Collectors.toSet());
+    public List<LessonState> makePlaceForRentedLesson(){
+        int limit = Configuration.getInstance().getRentedLessonsLimit();
+        List<LessonState> toBeRemoved = new LinkedList<>();
+        for(Iterator<LessonState> i = lessonStates.iterator(); getRentedLessons().size() >  limit - 1; ){
+            LessonState lessonState = i.next();
+            if (lessonState.getState() == LessonState.State.RENTED){
+                toBeRemoved.add(lessonState);
+                i.remove();
+            }
+        }
+        return toBeRemoved;
+    }
+
+    public List<Lesson> getFinishedLessons(){
+        return lessonStates.stream().filter(l->l.getState() == LessonState.State.FINISHED).map(LessonState::getLesson).collect(Collectors.toList());
     }
 }
