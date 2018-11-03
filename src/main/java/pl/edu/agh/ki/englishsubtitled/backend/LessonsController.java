@@ -13,12 +13,14 @@ import pl.edu.agh.ki.englishsubtitled.backend.exception.LessonIdNotFoundExceptio
 import pl.edu.agh.ki.englishsubtitled.backend.exception.LessonPostingException;
 import pl.edu.agh.ki.englishsubtitled.backend.exception.LessonRentalLimitExceededException;
 import pl.edu.agh.ki.englishsubtitled.backend.model.*;
+import pl.edu.agh.ki.englishsubtitled.backend.repository.FilmRepository;
 import pl.edu.agh.ki.englishsubtitled.backend.repository.LessonRepository;
 import pl.edu.agh.ki.englishsubtitled.backend.repository.LessonStateRepository;
 import pl.edu.agh.ki.englishsubtitled.backend.service.FilmService;
 import pl.edu.agh.ki.englishsubtitled.backend.service.TranslationService;
 import pl.edu.agh.ki.englishsubtitled.backend.service.UserService;
 
+import javax.persistence.EntityNotFoundException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -30,15 +32,17 @@ public class LessonsController {
     private final LessonRepository lessonRepository;
     private final LessonStateRepository lessonStateRepository;
     private final TranslationService translationService;
+    private final FilmRepository filmRepository;
     private final FilmService filmService;
     private final UserService userService;
 
     @Autowired
     LessonsController(LessonRepository lessonRepository, LessonStateRepository lessonStateRepository,
-                      TranslationService translationService, FilmService filmService, UserService userService){
+                      TranslationService translationService, FilmRepository filmRepository, FilmService filmService, UserService userService){
         this.lessonRepository = lessonRepository;
         this.lessonStateRepository = lessonStateRepository;
         this.translationService = translationService;
+        this.filmRepository = filmRepository;
         this.filmService = filmService;
         this.userService = userService;
     }
@@ -69,7 +73,7 @@ public class LessonsController {
         }
 
         if (!user.getRelatedLessons().contains(lessonOptional.get())){
-            if (user.getRentedLessons().size() + 1 >= Configuration.getInstance().getRentedLessonsLimit()){
+            if (user.getRentedLessons().size() >= Configuration.getInstance().getRentedLessonsLimit()){
                 throw new LessonRentalLimitExceededException();
             }else{
                 LessonState lessonState = new LessonState(user, lessonOptional.get());
@@ -81,6 +85,7 @@ public class LessonsController {
     }
 
     @RequestMapping(path = "/{lessonId}", method = RequestMethod.DELETE)
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public void removeLesson(@RequestHeader("Authorization") String token, @PathVariable String lessonId){
         userService.authenticateAdmin(token);
         int lessonIdInt;
@@ -90,10 +95,26 @@ public class LessonsController {
             throw new LessonIdInvalidException(lessonId);
         }
 
+        Film parent = null;
+
+        try {
+            Lesson lesson = lessonRepository.getOne(lessonIdInt);
+            Film film = lesson.getFilm();
+            if (film.getLessons().size() == 1){ // This lesson only
+                parent = film;
+            }
+        } catch (EntityNotFoundException e){
+            parent = null;
+        }
+
         try {
             lessonRepository.deleteById(lessonIdInt);
         }catch (EmptyResultDataAccessException e){
             throw new LessonIdNotFoundException(lessonIdInt);
+        }
+
+        if (parent != null){
+            filmRepository.delete(parent);
         }
     }
 

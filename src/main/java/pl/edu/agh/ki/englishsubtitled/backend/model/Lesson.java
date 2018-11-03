@@ -42,6 +42,10 @@ public class Lesson {
         return new LessonDto(lessonId, lessonTitle, film.getFilmTitle(), translationsDto);
     }
 
+    public Film getFilm() {
+        return film;
+    }
+
     public Integer getLessonId() {
         return lessonId;
     }

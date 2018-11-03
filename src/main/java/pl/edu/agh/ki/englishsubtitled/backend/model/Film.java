@@ -44,6 +44,10 @@ public class Film {
         return filmTitle;
     }
 
+    public List<Lesson> getLessons() {
+        return lessons;
+    }
+
     public FilmDto getDto(){
         List<LessonSummaryDto> lessonDtos = lessons.stream().map(Lesson::getSummary).collect(Collectors.toList());
         return new FilmDto(filmTitle, lessonDtos);
