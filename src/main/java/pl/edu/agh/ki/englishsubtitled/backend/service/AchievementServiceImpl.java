@@ -22,7 +22,7 @@ public class AchievementServiceImpl implements AchievementService {
     private final AchievementEntryRepository achievementEntryRepository;
 
     @Autowired
-    public AchievementServiceImpl(AchievementEntryRepository achievementEntryRepository){
+    public AchievementServiceImpl(AchievementEntryRepository achievementEntryRepository) {
         this.achievementEntryRepository = achievementEntryRepository;
     }
 
@@ -33,21 +33,41 @@ public class AchievementServiceImpl implements AchievementService {
         List<Lesson> finishedLessons = user.getFinishedLessons();
         Set<Integer> finishedLessonsIds = finishedLessons.stream().map(Lesson::getLessonId).collect(Collectors.toSet());
         Integer cachedLessonId = lessonId;
-        if (!finishedLessonsIds.contains(cachedLessonId)) userStatistics.increaseFinishedLessonsCountBy(1);
+        if (!finishedLessonsIds.contains(cachedLessonId)) userStatistics.incrementFinishedLessonsCount();
+
+        userStatistics.increaseMistakesCountBy(lessonResults.mistakes);
+
+        userStatistics.updateCorrectAnswersInRowMaxIfHigher(lessonResults.correctAnswersInRow);
+
+        if (lessonResults.crosswordGames + lessonResults.abcdGames + lessonResults.wordGames == lessonResults.correctAnswersAsFirst) {
+            userStatistics.incrementFullyCorrectLessons();
+        }
+
+        userStatistics.increaseCorrectAnswersAsFirstCountBy(lessonResults.correctAnswersAsFirst);
+
+        userStatistics.increaseDictionaryAdditionsBy(lessonResults.dictionaryAdditions);
+
+        userStatistics.increaseCrosswordGamesCountBy(lessonResults.crosswordGames);
+
+        userStatistics.increaseAbcdGamesCountBy(lessonResults.abcdGames);
+
+        userStatistics.increaseWordGamesCountBy(lessonResults.wordGames);
     }
 
     @Override
-    public List<AchievementEntry> recognizeNewAchievements(User user){
+    public List<AchievementEntry> recognizeNewAchievements(User user) {
         UserStatistics userStatistics = user.getUserStatistics();
         List<AchievementEntry> newAchievements = new LinkedList<>();
 
         Set<Achievement> ownedAchievements = userStatistics.getRecognizedAchievementsSet();
 
-        if(!ownedAchievements.contains(Achievement.FIRST_STEPS)){
-            if(userStatistics.getFinishedLessonsCount() > 0){
-                AchievementEntry achievementEntry =  new AchievementEntry(userStatistics, Achievement.FIRST_STEPS);
-                userStatistics.addAchievementEntry(achievementEntry);
-                newAchievements.add(achievementEntry);
+        for (Achievement achievement : Achievement.values()) {
+            if (!ownedAchievements.contains(achievement)) {
+                if (achievement.checkCondition(userStatistics)) {
+                    AchievementEntry achievementEntry = new AchievementEntry(userStatistics, achievement);
+                    userStatistics.addAchievementEntry(achievementEntry);
+                    newAchievements.add(achievementEntry);
+                }
             }
         }
 
