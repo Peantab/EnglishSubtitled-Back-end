@@ -2,8 +2,13 @@
 
 Repozytorium zawiera back-end dla systemu będącego projektem inżynierskim.
 
+## Komponenty systemu
+* Aplikacja serwerowa (to repozytorium)
+* [Aplikacja kliencka](https://github.com/justynamaciag/EnglishSubtitled-Android)
+* [Narzędzia administracyjne](https://github.com/Agnes5/EnglishSubtitled-AdminMenu)
+
 ## Uruchamianie
-Aplikacja wymaga programów `docker` i `docker-compose` w celu uruchomienia bazy danych:
+Aplikacja wymaga programów `docker` i `docker-compose` w celu uruchomienia lokalnej bazy danych:
 
 `sudo docker-compose up -d` uruchamia bazę danych w tle.
 
